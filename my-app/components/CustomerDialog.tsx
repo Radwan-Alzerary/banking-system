@@ -1,48 +1,75 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Customer } from '@/types'
-import { v4 as uuidv4 } from 'uuid'
+import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Customer } from '@/types';
+import { v4 as uuidv4 } from 'uuid';
 
-interface CustomerDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (customer: Customer) => void
-  customer?: Customer
+// Helper to convert Arabic digits to ASCII digits (optional if needed)
+function convertArabicNumeralsToEnglish(value: string): string {
+  const arNums = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+  const enNums = ['0','1','2','3','4','5','6','7','8','9'];
+
+  return value.replace(/[٠-٩]/g, (d) => {
+    const index = arNums.indexOf(d);
+    return index !== -1 ? enNums[index] : d;
+  });
 }
 
-export function CustomerDialog({ isOpen, onClose, onSubmit, customer }: CustomerDialogProps) {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [address, setAddress] = useState('')
-  const [dinarBalance, setDinarBalance] = useState('0')
-  const [dollarBalance, setDollarBalance] = useState('0')
+interface CustomerDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (customer: Customer) => void; // Must be full Customer
+  customer?: Customer;
+}
+
+export function CustomerDialog({
+  isOpen,
+  onClose,
+  onSubmit,
+  customer
+}: CustomerDialogProps) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [dinarBalance, setDinarBalance] = useState('0');
+  const [dollarBalance, setDollarBalance] = useState('0');
 
   useEffect(() => {
     if (customer) {
-      setName(customer.name)
-      setEmail(customer.email)
-      setPhone(customer.phone)
-      setAddress(customer.address)
-      setDinarBalance(customer.safes.dinar.balance.toString())
-      setDollarBalance(customer.safes.dollar.balance.toString())
+      setName(customer.name);
+      setEmail(customer.email);
+      setPhone(customer.phone);
+      setAddress(customer.address);
+      setDinarBalance(customer.safes.dinar.balance.toString());
+      setDollarBalance(customer.safes.dollar.balance.toString());
     } else {
-      setName('')
-      setEmail('')
-      setPhone('')
-      setAddress('')
-      setDinarBalance('0')
-      setDollarBalance('0')
+      setName('');
+      setEmail('');
+      setPhone('');
+      setAddress('');
+      setDinarBalance('0');
+      setDollarBalance('0');
     }
-  }, [customer])
+  }, [customer]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
+
+    // Convert Arabic digits to ASCII if needed
+    const englishDinarBalance = convertArabicNumeralsToEnglish(dinarBalance);
+    const englishDollarBalance = convertArabicNumeralsToEnglish(dollarBalance);
+
     const customerData: Customer = {
       id: customer ? customer.id : uuidv4(),
       name,
@@ -51,19 +78,29 @@ export function CustomerDialog({ isOpen, onClose, onSubmit, customer }: Customer
       address,
       avatar: customer ? customer.avatar : '/placeholder.svg?height=100&width=100',
       safes: {
-        dinar: { currency: 'dinar', balance: parseFloat(dinarBalance) },
-        dollar: { currency: 'dollar', balance: parseFloat(dollarBalance) },
-      },
-    }
-    onSubmit(customerData)
-    onClose()
-  }
+        dinar: {
+          currency: 'dinar',
+          balance: parseFloat(englishDinarBalance) || 0
+        },
+        dollar: {
+          currency: 'dollar',
+          balance: parseFloat(englishDollarBalance) || 0
+        }
+      }
+    };
+
+    console.log('Submitting Customer:', customerData); // Debug
+    onSubmit(customerData); 
+    onClose();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{customer ? 'تعديل العميل' : 'إضافة عميل جديد'}</DialogTitle>
+          <DialogTitle>
+            {customer ? 'تعديل العميل' : 'إضافة عميل جديد'}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
@@ -139,11 +176,12 @@ export function CustomerDialog({ isOpen, onClose, onSubmit, customer }: Customer
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit">{customer ? 'تحديث' : 'إضافة'} العميل</Button>
+            <Button type="submit">
+              {customer ? 'تحديث' : 'إضافة'} العميل
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-

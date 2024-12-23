@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { useAppContext } from '@/contexts/AppContext'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState } from 'react';
+import { useAppContext } from '@/contexts/AppContext';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -11,39 +11,50 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import Link from 'next/link'
-import { CustomerDialog } from '@/components/CustomerDialog'
-import { Customer } from '@/types'
+} from "@/components/ui/table";
+import Link from 'next/link';
+import { CustomerDialog } from '@/components/CustomerDialog';
+import { Customer } from '@/types';
 
 export default function CustomersPage() {
-  const { customers, addCustomer, updateCustomer, deleteCustomer } = useAppContext()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
-  console.log(customers)
+  const { customers, addCustomer, updateCustomer, deleteCustomer } = useAppContext();
 
-  const filteredCustomers = customers.filter(customer =>
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState<string | null>(null);
+
+  // Filter customers based on the search term
+  const filteredCustomers = customers.filter((customer) =>
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.phone.includes(searchTerm) ||
     customer.address.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  );
 
-  const handleAddCustomer = async (newCustomer: Omit<Customer, 'id'>) => {
-    console.log(newCustomer)
-    await addCustomer(newCustomer)
-    setIsDialogOpen(false)
-  }
+  const handleAddCustomer = async (newCustomer: Customer) => {
+    await addCustomer(newCustomer);
+    setIsDialogOpen(false);
+  };
 
   const handleEditCustomer = async (updatedCustomer: Customer) => {
-    await updateCustomer(updatedCustomer)
-    setEditingCustomer(null)
-  }
+    await updateCustomer(updatedCustomer);
+    setEditingCustomer(null);
+  };
 
-  const handleDeleteCustomer = async (customerId: string) => {
-    await deleteCustomer(customerId)
-  }
+  const confirmDeleteCustomer = (customerId: string) => {
+    setCustomerToDelete(customerId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteCustomer = async () => {
+    if (customerToDelete) {
+      await deleteCustomer(customerToDelete);
+      setCustomerToDelete(null);
+      setIsDeleteDialogOpen(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -76,15 +87,36 @@ export default function CustomersPage() {
               <TableCell>{customer.email}</TableCell>
               <TableCell>{customer.phone}</TableCell>
               <TableCell>{customer.address}</TableCell>
-              <TableCell>{customer.safes.dinar.balance.toFixed(2)} د</TableCell>
-              <TableCell>${customer.safes.dollar.balance.toFixed(2)}</TableCell>
+              <TableCell>
+                {customer.safes.dinar.balance.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })} د
+              </TableCell>
+              <TableCell>
+                $
+                {customer.safes.dollar.balance.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </TableCell>
               <TableCell>
                 <div className="flex space-x-2">
                   <Button variant="outline" asChild>
                     <Link href={`/customers/${customer.id}`}>عرض</Link>
                   </Button>
-                  <Button variant="outline" onClick={() => setEditingCustomer(customer)}>تعديل</Button>
-                  <Button variant="destructive" onClick={() => handleDeleteCustomer(customer.id)}>حذف</Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setEditingCustomer(customer)}
+                  >
+                    تعديل
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => confirmDeleteCustomer(customer.id)}
+                  >
+                    حذف
+                  </Button>
                 </div>
               </TableCell>
             </TableRow>
@@ -104,6 +136,22 @@ export default function CustomersPage() {
           customer={editingCustomer}
         />
       )}
+      {isDeleteDialogOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-4 rounded shadow-lg space-y-4">
+            <h2 className="text-xl font-bold">تأكيد الحذف</h2>
+            <p>هل أنت متأكد أنك تريد حذف هذا العميل؟</p>
+            <div className="flex space-x-2">
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                إلغاء
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteCustomer}>
+                حذف
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }

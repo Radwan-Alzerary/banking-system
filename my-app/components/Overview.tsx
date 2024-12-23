@@ -1,18 +1,35 @@
 'use client'
 
+import { useEffect, useState } from "react"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 
-const data = [
-  { name: "يناير", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "فبراير", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "مارس", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "أبريل", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "مايو", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "يونيو", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "يوليو", total: Math.floor(Math.random() * 5000) + 1000 },
-]
-
 export function Overview() {
+  const [data, setData] = useState<{ name: string; total: number }[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchMonthlyTotals = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/dashboard/monthly-totals')
+        if (!response.ok) {
+          throw new Error('Failed to fetch monthly totals')
+        }
+        const result = await response.json()
+        setData(result)
+      } catch (err) {
+        setError('Failed to load data')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchMonthlyTotals()
+  }, [])
+
+  if (loading) return <div>جاري تحميل البيانات...</div>
+  if (error) return <div>خطأ: {error}</div>
+
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={data}>
@@ -61,4 +78,3 @@ export function Overview() {
     </ResponsiveContainer>
   )
 }
-

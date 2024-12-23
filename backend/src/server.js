@@ -19,6 +19,8 @@ app.use('/api/customers', require('./routes/customers'));
 app.use('/api/transactions', require('./routes/transactions'));
 app.use('/api/exchange-rate', require('./routes/exchangeRate'));
 app.use('/api/backup', require('./routes/backup'));
+app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/analysis', require('./routes/analysis'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

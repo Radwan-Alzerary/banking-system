@@ -1,43 +1,44 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { useAppContext } from '@/contexts/AppContext'
+import { useState } from "react"
+import { useAppContext } from "@/contexts/AppContext"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowRightIcon } from 'lucide-react'
-import { Combobox } from "@/components/ui/combobox"
+import { ArrowRightIcon } from "lucide-react"
+import { Combobox } from "@/components/ui/combobox" // <-- Import the updated Combobox
 
 interface TransferMoneyProps {
   fromCustomerId: string
 }
 
 export function TransferMoney({ fromCustomerId }: TransferMoneyProps) {
-  const [amount, setAmount] = useState('')
-  const [currency, setCurrency] = useState<'dinar' | 'dollar'>('dinar')
-  const [toCustomerId, setToCustomerId] = useState('')
+  const [amount, setAmount] = useState("")
+  const [currency, setCurrency] = useState<"dinar" | "dollar">("dinar")
+  const [toCustomerId, setToCustomerId] = useState("")
   const { customers, transferMoney } = useAppContext()
 
-  const fromCustomer = customers.find(c => c.id === fromCustomerId)
-  const otherCustomers = customers.filter(c => c.id !== fromCustomerId)
+  const fromCustomer = customers.find((c) => c.id === fromCustomerId)
+  const otherCustomers = customers.filter((c) => c.id !== fromCustomerId)
+
+  // Build options for the Combobox
+  const customerOptions = otherCustomers.map((customer) => ({
+    value: customer.id,
+    label: customer.name,
+  }))
 
   const handleTransfer = async () => {
     const numAmount = parseFloat(amount)
     if (isNaN(numAmount) || numAmount <= 0 || !toCustomerId) return
 
     await transferMoney(fromCustomerId, toCustomerId, numAmount, currency)
-    setAmount('')
-    setToCustomerId('')
+    setAmount("")
+    setToCustomerId("")
   }
 
   if (!fromCustomer) return null
-
-  const customerOptions = otherCustomers.map(customer => ({
-    value: customer.id,
-    label: customer.name
-  }))
 
   return (
     <Card>
@@ -55,9 +56,13 @@ export function TransferMoney({ fromCustomerId }: TransferMoneyProps) {
             placeholder="أدخل المبلغ"
           />
         </div>
+
         <div className="space-y-2">
           <Label htmlFor="transfer-currency">العملة</Label>
-          <Select value={currency} onValueChange={(value: 'dinar' | 'dollar') => setCurrency(value)}>
+          <Select
+            value={currency}
+            onValueChange={(value: "dinar" | "dollar") => setCurrency(value)}
+          >
             <SelectTrigger id="transfer-currency">
               <SelectValue placeholder="اختر العملة" />
             </SelectTrigger>
@@ -67,17 +72,20 @@ export function TransferMoney({ fromCustomerId }: TransferMoneyProps) {
             </SelectContent>
           </Select>
         </div>
+
         <div className="space-y-2">
           <Label htmlFor="transfer-to">تحويل إلى</Label>
           <Combobox
             options={customerOptions}
             value={toCustomerId}
-            onChange={setToCustomerId}
+            onChange={(newVal) => setToCustomerId(newVal)}
             placeholder="اختر المستلم"
           />
         </div>
+
         <Button onClick={handleTransfer} className="w-full">
-          <ArrowRightIcon className="ml-2 h-4 w-4" /> تحويل
+          <ArrowRightIcon className="ml-2 h-4 w-4" />
+          تحويل
         </Button>
       </CardContent>
     </Card>

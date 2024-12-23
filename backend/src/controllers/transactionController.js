@@ -35,14 +35,14 @@ exports.createTransaction = async (req, res) => {
     if (type === 'deposit') {
       customer.safes[fromCurrency].balance += amount;
     } else if (type === 'withdraw') {
-      if (customer.safes[fromCurrency].balance < amount) {
-        return res.status(400).json({ error: 'Insufficient funds' });
-      }
+      // if (customer.safes[fromCurrency].balance < amount) {
+      //   return res.status(400).json({ error: 'Insufficient funds' });
+      // }
       customer.safes[fromCurrency].balance -= amount;
     } else if (type === 'exchange') {
-      if (customer.safes[fromCurrency].balance < amount) {
-        return res.status(400).json({ error: 'Insufficient funds' });
-      }
+      // if (customer.safes[fromCurrency].balance < amount) {
+      //   return res.status(400).json({ error: 'Insufficient funds' });
+      // }
       customer.safes[fromCurrency].balance -= amount;
       const rate = fromCurrency === 'dinar' ? exchangeRate.dinarToDollar : exchangeRate.dollarToDinar;
       customer.safes[toCurrency].balance += amount * rate;
@@ -57,7 +57,6 @@ exports.createTransaction = async (req, res) => {
       fromCurrency,
       toCurrency,
       note, // Save the note
-
     });
 
     res.json({ ...newTransaction._doc, id: newTransaction._id });

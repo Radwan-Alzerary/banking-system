@@ -21,7 +21,7 @@ export function BankAccount({ currency, balance, customerId }: BankAccountProps)
   const { addTransaction } = useAppContext()
 
   const handleTransaction = async (type: 'deposit' | 'withdraw') => {
-    const numAmount = parseFloat(amount)
+    const numAmount = parseFloat(amount.replace(/,/g, '')) // Remove commas for parsing
     if (isNaN(numAmount) || numAmount <= 0) return
 
     await addTransaction({
@@ -36,6 +36,9 @@ export function BankAccount({ currency, balance, customerId }: BankAccountProps)
     setNote('')
   }
 
+  const formatNumber = (value: number | string) =>
+    new Intl.NumberFormat('en-US').format(typeof value === 'number' ? value : parseFloat(value.replace(/,/g, '')) || 0)
+
   return (
     <Card>
       <CardHeader>
@@ -43,15 +46,20 @@ export function BankAccount({ currency, balance, customerId }: BankAccountProps)
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-3xl font-bold">
-          {currency === 'dinar' ? 'د' : '$'}{balance.toFixed(2)}
+          {currency === 'dinar' ? 'د' : '$'}{formatNumber(balance)}
         </div>
         <div className="space-y-2">
           <Label htmlFor={`${currency}-amount`}>المبلغ</Label>
           <Input
             id={`${currency}-amount`}
-            type="number"
+            type="text"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              const rawValue = e.target.value.replace(/,/g, '') // Remove commas before parsing
+              if (!isNaN(Number(rawValue)) || rawValue === '') {
+                setAmount(formatNumber(rawValue))
+              }
+            }}
             placeholder={`أدخل المبلغ بال${currency === 'dinar' ? 'دينار' : 'دولار'}`}
           />
         </div>

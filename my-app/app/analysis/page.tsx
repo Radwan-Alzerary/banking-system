@@ -15,14 +15,14 @@ export default function AnalysisPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Transaction Analysis</h1>
+      <h1 className="text-3xl font-bold">تحليل العمليات</h1>
       <div className="flex flex-col md:flex-row gap-4">
         <DateRangePicker onChange={setDateRange} />
         <CurrencyFilter value={currency} onChange={setCurrency} />
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Transaction Overview</CardTitle>
+          <CardTitle>نظرة عامة على العمليات</CardTitle>
         </CardHeader>
         <CardContent>
           <TransactionChart dateRange={dateRange} currency={currency} />
@@ -30,7 +30,7 @@ export default function AnalysisPage() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Transaction Details</CardTitle>
+          <CardTitle>تفاصيل العمليات</CardTitle>
         </CardHeader>
         <CardContent>
           <TransactionTable 
@@ -44,4 +44,3 @@ export default function AnalysisPage() {
     </div>
   )
 }
-

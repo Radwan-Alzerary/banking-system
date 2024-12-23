@@ -3,15 +3,57 @@ const Customer = require('../models/Customer');
 
 exports.createCustomer = async (req, res) => {
   try {
-    const { name, email, phone, address, avatar } = req.body;
-    const newCustomer = await Customer.create({ name, email, phone, address, avatar });
-    return res.json({ ...newCustomer._doc, id: newCustomer._id });
+    const {
+      name,
+      email,
+      phone,
+      address,
+      avatar,
+      safes = {}
+    } = req.body;
+
+    // Safely extract balances or default to 0
+    const dinarBalance =
+      safes.dinar && safes.dinar.balance != null
+        ? parseFloat(safes.dinar.balance)
+        : 0;
+
+    const dollarBalance =
+      safes.dollar && safes.dollar.balance != null
+        ? parseFloat(safes.dollar.balance)
+        : 0;
+
+    // Create new customer in MongoDB
+    const newCustomer = await Customer.create({
+      name,
+      email,
+      phone,
+      address,
+      avatar,
+      safes: {
+        // Force 'dinar' as currency
+        dinar: {
+          currency: 'dinar',
+          balance: isNaN(dinarBalance) ? 0 : dinarBalance,
+        },
+        // Force 'dollar' as currency
+        dollar: {
+          currency: 'dollar',
+          balance: isNaN(dollarBalance) ? 0 : dollarBalance,
+        },
+      },
+    });
+
+    // Return the doc, mapping _id to id
+    return res.json({
+      ...newCustomer._doc,
+      id: newCustomer._id,
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server Error' });
+    return res.status(500).json({ error: 'Server Error' });
   }
 };
-
 exports.getCustomers = async (req, res) => {
   try {
     const customers = await Customer.find({});

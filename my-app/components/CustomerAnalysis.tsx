@@ -1,51 +1,96 @@
 'use client'
 
-import { useAppContext } from '@/contexts/AppContext'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
+import { Customer } from '@/types' // If you have a Customer type or interface
 
 interface CustomerAnalysisProps {
   customerId: string
 }
 
+// This interface should match the shape returned by your backend
+interface Transaction {
+  _id: string
+  customerId: string
+  type: 'deposit' | 'withdraw' | 'exchange'
+  amount: number
+  fromCurrency: 'dinar' | 'dollar'
+  note?: string | null
+  date: string
+  // ...other fields like createdAt, updatedAt, etc.
+}
+
 export function CustomerAnalysis({ customerId }: CustomerAnalysisProps) {
-  const { transactions, customers } = useAppContext()
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const customer = customers.find(c => c.id === customerId)
-  if (!customer) return null
+  // Fetch the specific customer's transactions from the backend
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await fetch(`http://localhost:5000/api/transactions/customer/${customerId}`)
+        if (!res.ok) {
+          throw new Error('Failed to fetch customer transactions')
+        }
+        const data = await res.json()
+        setTransactions(data)
+      } catch (err: any) {
+        setError(err.message || 'Error loading transactions')
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const customerTransactions = transactions.filter(t => t.customerId === customerId)
+    fetchTransactions()
+  }, [customerId])
 
-  const totalDeposits = customerTransactions
-    .filter(t => t.type === 'deposit')
+  if (loading) {
+    return <div>جاري تحميل التحليل...</div>
+  }
+
+  if (error) {
+    return <div>خطأ: {error}</div>
+  }
+
+  // Now we have the transactions specifically for this customer
+  const totalDeposits = transactions
+    .filter((t) => t.type === 'deposit')
     .reduce((sum, t) => sum + t.amount, 0)
 
-  const totalWithdrawals = customerTransactions
-    .filter(t => t.type === 'withdraw')
+  const totalWithdrawals = transactions
+    .filter((t) => t.type === 'withdraw')
     .reduce((sum, t) => sum + t.amount, 0)
 
-  const totalExchanges = customerTransactions
-    .filter(t => t.type === 'exchange')
+  const totalExchanges = transactions
+    .filter((t) => t.type === 'exchange')
     .reduce((sum, t) => sum + t.amount, 0)
 
+  // Prepare data for the “Transactions by Type” chart
   const transactionsByType = [
     { name: 'الإيداعات', value: totalDeposits },
     { name: 'السحوبات', value: totalWithdrawals },
     { name: 'التبادلات', value: totalExchanges },
   ]
 
-  const transactionsByCurrency = customerTransactions.reduce((acc, t) => {
-    acc[t.fromCurrency] = (acc[t.fromCurrency] || 0) + t.amount
+  // Prepare data for the “Transactions by Currency” chart
+  const currencyTotals = transactions.reduce<Record<string, number>>((acc, t) => {
+    const currencyKey = t.fromCurrency // "dinar" or "dollar"
+    acc[currencyKey] = (acc[currencyKey] || 0) + t.amount
     return acc
-  }, {} as Record<string, number>)
+  }, {})
 
-  const currencyData = Object.entries(transactionsByCurrency).map(([currency, amount]) => ({
-    name: currency.toUpperCase(),
+  const currencyData = Object.entries(currencyTotals).map(([currency, amount]) => ({
+    name: currency === 'dinar' ? 'IQD' : 'USD',
     value: amount,
   }))
 
   return (
     <div className="space-y-6">
+      {/* 1) Transaction Summary Cards */}
       <Card>
         <CardHeader>
           <CardTitle>ملخص المعاملات</CardTitle>
@@ -68,6 +113,7 @@ export function CustomerAnalysis({ customerId }: CustomerAnalysisProps) {
         </CardContent>
       </Card>
 
+      {/* 2) Transactions By Type */}
       <Card>
         <CardHeader>
           <CardTitle>المعاملات حسب النوع</CardTitle>
@@ -84,6 +130,7 @@ export function CustomerAnalysis({ customerId }: CustomerAnalysisProps) {
         </CardContent>
       </Card>
 
+      {/* 3) Transactions By Currency */}
       <Card>
         <CardHeader>
           <CardTitle>المعاملات حسب العملة</CardTitle>
