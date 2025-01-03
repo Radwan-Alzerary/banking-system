@@ -44,7 +44,7 @@ export function ExchangePanel({ dinarBalance, dollarBalance, customerId }: Excha
 
   const toCurrency = fromCurrency === 'dinar' ? 'dollar' : 'dinar'
   const rate = fromCurrency === 'dinar' ? exchangeRate.dinarToDollar : exchangeRate.dollarToDinar
-  const convertedAmount = parseFloat(amount) * rate
+  const convertedAmount = fromCurrency === 'dinar' ? ( parseFloat(amount) / rate ) : ( parseFloat(amount) * rate )
 
   return (
     <Card>
@@ -82,7 +82,7 @@ export function ExchangePanel({ dinarBalance, dollarBalance, customerId }: Excha
         <div className="space-y-2">
           <Label>إلى</Label>
           <div className="text-2xl font-bold">
-            {toCurrency === 'dinar' ? 'د' : '$'}{convertedAmount.toFixed(2)} {toCurrency === 'dinar' ? 'دينار' : 'دولار'}
+            {toCurrency === 'dinar' ? 'د' : '$'}{convertedAmount.toLocaleString()} {toCurrency === 'dinar' ? 'دينار' : 'دولار'}
           </div>
         </div>
         <div className="space-y-2">
@@ -98,7 +98,7 @@ export function ExchangePanel({ dinarBalance, dollarBalance, customerId }: Excha
           تحويل
         </Button>
         <div className="text-sm text-muted-foreground">
-          سعر الصرف: 1 {fromCurrency === 'dinar' ? 'دينار' : 'دولار'} = {rate.toFixed(2)} {toCurrency === 'dinar' ? 'دينار' : 'دولار'}
+          سعر الصرف: 1 {fromCurrency === 'dinar' ? 'دينار' : 'دولار'} = {rate.toFixed(0)} {toCurrency === 'dinar' ? 'دينار' : 'دولار'}
         </div>
       </CardContent>
     </Card>

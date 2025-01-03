@@ -15,8 +15,8 @@ exports.getTransactions = async (req, res) => {
 
 
 exports.createTransaction = async (req, res) => {
-  const { customerId, type, amount, fromCurrency, toCurrency,note } = req.body;
-
+  const { customerId, type, amount, fromCurrency, toCurrency, note } = req.body;
+  console.log(req.body)
   if (!['deposit', 'withdraw', 'exchange'].includes(type)) {
     return res.status(400).json({ error: 'Invalid transaction type' });
   }
@@ -45,7 +45,7 @@ exports.createTransaction = async (req, res) => {
       // }
       customer.safes[fromCurrency].balance -= amount;
       const rate = fromCurrency === 'dinar' ? exchangeRate.dinarToDollar : exchangeRate.dollarToDinar;
-      customer.safes[toCurrency].balance += amount * rate;
+      customer.safes[toCurrency].balance += fromCurrency === 'dinar' ? (amount / rate) : (amount * rate)
     }
 
     await customer.save();

@@ -62,7 +62,7 @@ export function TransactionTable({ searchTerm, filterType, dateRange, currency }
               <TableCell className="capitalize">
                 {transaction.type === 'deposit' ? 'إيداع' : transaction.type === 'withdraw' ? 'سحب' : 'تحويل'}
               </TableCell>
-              <TableCell>{transaction.amount.toFixed(2)}</TableCell>
+              <TableCell>{transaction.amount.toFixed(0)}</TableCell>
               <TableCell>{transaction.fromCurrency.toUpperCase()}</TableCell>
               <TableCell>{transaction.toCurrency ? transaction.toCurrency.toUpperCase() : '-'}</TableCell>
             </TableRow>

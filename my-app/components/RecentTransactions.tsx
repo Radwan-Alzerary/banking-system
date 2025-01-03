@@ -21,7 +21,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
           <TableRow key={transaction.id}>
             <TableCell>{new Date(transaction.date).toLocaleDateString('ar-EG')}</TableCell>
             <TableCell>{transaction.type}</TableCell>
-            <TableCell>{transaction.amount.toFixed(2)}</TableCell>
+            <TableCell>{transaction.amount.toFixed(0)}</TableCell>
             <TableCell>{transaction.fromCurrency === 'dinar' ? 'دينار' : 'دولار'}</TableCell>
           </TableRow>
         ))}

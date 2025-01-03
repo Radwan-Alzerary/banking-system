@@ -76,7 +76,7 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">سعر الصرف</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">١ دولار = {exchangeRateValue.toFixed(2)} د</div>
+            <div className="text-2xl font-bold">١ دولار = {exchangeRateValue.toFixed(0)} د</div>
             <p className="text-xs text-muted-foreground">تحديث منذ ٥ دقائق</p>
           </CardContent>
         </Card>

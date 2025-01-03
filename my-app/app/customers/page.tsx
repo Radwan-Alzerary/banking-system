@@ -89,15 +89,15 @@ export default function CustomersPage() {
               <TableCell>{customer.address}</TableCell>
               <TableCell>
                 {customer.safes.dinar.balance.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
                 })} د
               </TableCell>
               <TableCell>
                 $
                 {customer.safes.dollar.balance.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
                 })}
               </TableCell>
               <TableCell>

@@ -139,7 +139,7 @@ export function TransactionChart({ dateRange, currency }: TransactionChartProps)
         <XAxis dataKey="date" />
         <YAxis />
         <Tooltip
-          formatter={(value: number) => value.toFixed(2)}
+          formatter={(value: number) => value.toFixed(0)}
         />
         <Legend />
         {(currency === 'IQD' || currency === 'both') && (

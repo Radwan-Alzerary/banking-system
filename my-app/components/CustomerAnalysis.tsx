@@ -99,15 +99,15 @@ export function CustomerAnalysis({ customerId }: CustomerAnalysisProps) {
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
               <dt className="text-sm font-medium text-gray-500">إجمالي الإيداعات</dt>
-              <dd className="mt-1 text-3xl font-semibold">{totalDeposits.toFixed(2)}</dd>
+              <dd className="mt-1 text-3xl font-semibold">{totalDeposits.toLocaleString()}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">إجمالي السحوبات</dt>
-              <dd className="mt-1 text-3xl font-semibold">{totalWithdrawals.toFixed(2)}</dd>
+              <dd className="mt-1 text-3xl font-semibold">{totalWithdrawals.toLocaleString()}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">إجمالي التبادلات</dt>
-              <dd className="mt-1 text-3xl font-semibold">{totalExchanges.toFixed(2)}</dd>
+              <dd className="mt-1 text-3xl font-semibold">{totalExchanges.toLocaleString()}</dd>
             </div>
           </dl>
         </CardContent>
