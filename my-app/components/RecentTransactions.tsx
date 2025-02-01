@@ -19,8 +19,15 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
       <TableBody>
         {transactions.map((transaction) => (
           <TableRow key={transaction.id}>
-            <TableCell>{new Date(transaction.date).toLocaleDateString('ar-EG')}</TableCell>
-            <TableCell>{transaction.type}</TableCell>
+            <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
+            <TableCell>
+              {{
+                deposit: 'إيداع',
+                withdraw: 'سحب',
+                exchange: 'تحويل',
+                transfer: 'نقل'
+              }[transaction.type]}
+            </TableCell>
             <TableCell>{transaction.amount.toFixed(0)}</TableCell>
             <TableCell>{transaction.fromCurrency === 'dinar' ? 'دينار' : 'دولار'}</TableCell>
           </TableRow>

@@ -25,6 +25,19 @@ export default function CustomerProfilePage() {
     return <div>Customer not found</div>
   }
 
+  // This function re-fetches the latest customer data
+  // (Adjust the URL and logic as needed for your API)
+  const refreshCustomer = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/customers/${customer.id}`)
+      if (!res.ok) throw new Error('Failed to fetch customer')
+      const updatedCustomer = await res.json()
+      updateCustomer(updatedCustomer)
+    } catch (error) {
+      console.error('Error refreshing customer:', error)
+    }
+  }
+
   const handleEdit = () => {
     setIsEditing(true)
   }
@@ -89,7 +102,8 @@ export default function CustomerProfilePage() {
           <TransferMoney fromCustomerId={customer.id} />
         </TabsContent>
         <TabsContent value="transactions">
-          <TransactionList customerId={customer.id} /> {/* Pass customerId */}
+          {/* Pass refreshCustomer as the onTransactionUpdate callback */}
+          <TransactionList customerId={customer.id} onTransactionUpdate={refreshCustomer} />
         </TabsContent>
         <TabsContent value="analysis">
           <CustomerAnalysis customerId={customer.id} />

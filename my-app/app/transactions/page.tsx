@@ -35,16 +35,16 @@ export default function TransactionHistoryPage() {
               />
             </div>
             <div className="w-[200px]">
-              <Label htmlFor="type">Transaction Type</Label>
+              <Label htmlFor="type">نوع العملية</Label>
               <Select value={filterType} onValueChange={setFilterType}>
                 <SelectTrigger id="type">
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="deposit">Deposit</SelectItem>
-                  <SelectItem value="withdraw">Withdraw</SelectItem>
-                  <SelectItem value="exchange">Exchange</SelectItem>
+                  <SelectItem value="all">الكل</SelectItem>
+                  <SelectItem value="deposit">ايداع</SelectItem>
+                  <SelectItem value="withdraw">سحب</SelectItem>
+                  <SelectItem value="exchange">تحويل</SelectItem>
                 </SelectContent>
               </Select>
             </div>

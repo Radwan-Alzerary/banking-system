@@ -72,7 +72,7 @@ export default function CustomersPage() {
         <TableHeader>
           <TableRow>
             <TableHead>الاسم</TableHead>
-            <TableHead>البريد الإلكتروني</TableHead>
+            {/* <TableHead>البريد الإلكتروني</TableHead> */}
             <TableHead>رقم الهاتف</TableHead>
             <TableHead>العنوان</TableHead>
             <TableHead>رصيد الدينار</TableHead>
