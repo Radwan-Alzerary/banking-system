@@ -27,6 +27,8 @@ export function TransactionList({ customerId, onTransactionUpdate }: Transaction
   const [error, setError] = useState<string | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editTransaction, setEditTransaction] = useState<Transaction | null>(null)
+  // New state to toggle between combined view and separate tables
+  const [combinedView, setCombinedView] = useState(false)
 
   useEffect(() => {
     fetchTransactions()
@@ -99,61 +101,92 @@ export function TransactionList({ customerId, onTransactionUpdate }: Transaction
   if (loading) return <div>جاري تحميل المعاملات...</div>
   if (error) return <div>خطأ: {error}</div>
 
+  // Helper function to render a table given a list of transactions and a title
+  const renderTable = (tableTransactions: Transaction[], title: string) => (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>التاريخ</TableHead>
+              <TableHead>النوع</TableHead>
+              <TableHead>المبلغ</TableHead>
+              <TableHead>العملة</TableHead>
+              <TableHead>ملاحظات</TableHead>
+              <TableHead>الإجراءات</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tableTransactions.map((transaction) => (
+              <TableRow key={transaction._id}>
+                <TableCell>{new Date(transaction.date).toLocaleDateString('ar-EG')}</TableCell>
+                <TableCell>
+                  {{
+                    deposit: 'إيداع',
+                    withdraw: 'سحب',
+                    exchange: 'تحويل',
+                    transfer: 'نقل'
+                  }[transaction.type]}
+                </TableCell>
+                <TableCell>{transaction.amount.toLocaleString()}</TableCell>
+                <TableCell>{transaction.fromCurrency}</TableCell>
+                <TableCell>{transaction.note || '-'}</TableCell>
+                <TableCell className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEdit(transaction)}
+                  >
+                    <Pen className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(transaction._id)}
+                  >
+                    <Trash className="w-4 h-4 text-red-500" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  )
+
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>المعاملات الأخيرة</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>التاريخ</TableHead>
-                <TableHead>النوع</TableHead>
-                <TableHead>المبلغ</TableHead>
-                <TableHead>العملة</TableHead>
-                <TableHead>ملاحظات</TableHead>
-                <TableHead>الإجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transactions.map((transaction) => (
-                <TableRow key={transaction._id}>
-                  <TableCell>{new Date(transaction.date).toLocaleDateString('ar-EG')}</TableCell>
-                  <TableCell>
-                    {{
-                      deposit: 'إيداع',
-                      withdraw: 'سحب',
-                      exchange: 'تحويل',
-                      transfer: 'نقل'
-                    }[transaction.type]}
-                  </TableCell>
-                  <TableCell>{transaction.amount}</TableCell>
-                  <TableCell>{transaction.fromCurrency}</TableCell>
-                  <TableCell>{transaction.note || '-'}</TableCell>
-                  <TableCell className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(transaction)}
-                    >
-                      <Pen className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(transaction._id)}
-                    >
-                      <Trash className="w-4 h-4 text-red-500" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      {/* Toggle Button */}
+      <div className="flex justify-end mb-4">
+        <Button onClick={() => setCombinedView(prev => !prev)}>
+          {combinedView ? 'عرض المعاملات حسب العملة' : 'عرض كل المعاملات'}
+        </Button>
+      </div>
+
+      {combinedView ? (
+        // Combined table: show all transactions in one table
+        renderTable(transactions, 'كل المعاملات')
+      ) : (
+        // Render two tables side by side using flexbox
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="md:w-1/2">
+            {renderTable(
+              transactions.filter(t => t.fromCurrency === 'dollar'),
+              'المعاملات بالدولار'
+            )}
+          </div>
+          <div className="md:w-1/2">
+            {renderTable(
+              transactions.filter(t => t.fromCurrency === 'dinar'),
+              'المعاملات بالدينار'
+            )}
+          </div>
+        </div>
+      )}
 
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent>
